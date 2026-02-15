@@ -11,7 +11,7 @@ Usage:
 """
 
 import os
-import logging
+
 from pathlib import Path
 from string import Template
 from typing import Any, Optional
@@ -28,7 +28,7 @@ from google.adk.agents.remote_a2a_agent import (
 from google.adk.agents.invocation_context import InvocationContext
 from a2a.types import Message as A2AMessage
 
-logger = logging.getLogger("google_adk.adapters.remote_a2a_adapter")
+from app.utils.logging import logger
 
 # Path to the default configuration file (same directory as this module)
 _DEFAULT_CONF_PATH = Path(__file__).parent / "remote_agents_conf.yml"
@@ -45,6 +45,9 @@ class RemoteAgentConfig(BaseModel):
     timeout: float = 300.0
     full_history: bool = True
     authentication_flag: bool = False
+    allow_conversation_history: bool = (
+        True  # Whether to include conversation history in metadata
+    )
 
     @property
     def agent_card_url(self) -> str:
@@ -115,7 +118,9 @@ class RemoteA2aAdapter:
         )
     """
 
-    def __init__(self, config_path: Optional[str | Path] = None, auth_token: Optional[str] = None) -> None:
+    def __init__(
+        self, config_path: Optional[str | Path] = None, auth_token: Optional[str] = None
+    ) -> None:
         self._config_path = config_path
         self._auth_token = auth_token
         self._raw_configs: list[dict[str, Any]] = get_remote_a2a_conf(self._config_path)
@@ -178,7 +183,7 @@ class RemoteA2aAdapter:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _build_meta_provider() -> Any:
+    def _build_meta_provider(allow_conversation_history: bool) -> Any:
         """Build a metadata provider that forwards ``conversation_history``
         from the orchestrator's session state to the remote agent via A2A
         request metadata.
@@ -194,13 +199,20 @@ class RemoteA2aAdapter:
             A callable ``(InvocationContext, A2AMessage) -> dict``.
         """
 
-        def _provider(
-            ctx: InvocationContext, _message: A2AMessage
-        ) -> dict[str, Any]:
+        def _provider(ctx: InvocationContext, _message: A2AMessage) -> dict[str, Any]:
             conversation_history = list(
                 ctx.session.state.get("conversation_history", [])
             )
-            return {"conversation_history": conversation_history}
+            if allow_conversation_history:
+                logger.info(
+                    "Attaching conversation_history to A2A request metadata",
+                    len_of_history=len(conversation_history),
+                )
+                return {"conversation_history": conversation_history}
+            logger.info(
+                "Not attaching conversation_history to A2A request metadata (disabled by config)"
+            )
+            return {"conversation_history": []}
 
         return _provider
 
@@ -224,7 +236,9 @@ class RemoteA2aAdapter:
             agent_card=cfg.agent_card_url,
             a2a_client_factory=client_factory,
             full_history_when_stateless=cfg.full_history,
-            a2a_request_meta_provider=self._build_meta_provider(),
+            a2a_request_meta_provider=self._build_meta_provider(
+                cfg.allow_conversation_history
+            ),
         )
 
     def _build_client_factory(self, cfg: RemoteAgentConfig) -> ClientFactory:
@@ -246,7 +260,9 @@ class RemoteA2aAdapter:
 
         if cfg.authentication_flag:
             if not self._auth_token:
-                raise ValueError("Authentication flag is set but no auth token was provided")
+                raise ValueError(
+                    "Authentication flag is set but no auth token was provided"
+                )
             headers["Authorization"] = f"Bearer {self._auth_token}"
 
         client_config = ClientConfig(

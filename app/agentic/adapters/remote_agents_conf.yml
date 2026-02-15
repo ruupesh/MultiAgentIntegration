@@ -20,3 +20,4 @@ remote_agents:
     timeout: 300
     full_history: true
     authentication_flag: true
+    allow_conversation_history: true

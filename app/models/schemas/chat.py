@@ -17,8 +17,10 @@ def generate_timestamp() -> str:
 
 # --- Nested content models ---
 
+
 class HITLApprovalItem(BaseModel):
     """An item in the user's HITL approval list."""
+
     function_id: str
     function_name: str
     confirmed: bool = True
@@ -27,9 +29,10 @@ class HITLApprovalItem(BaseModel):
 
 class HITLRequestedItem(BaseModel):
     """An item in the assistant's HITL request list."""
+
     function_id: str
     function_name: str
-    confirmed:bool = False
+    confirmed: bool = False
     payload: dict
     hint: Optional[str] = None
 
@@ -37,11 +40,12 @@ class HITLRequestedItem(BaseModel):
 class ChatRequestContent(BaseModel):
     """
     Content block of a user chat request.
-    
+
     Conditional logic:
     - If `hitl_approval` is provided and non-empty, `message` is optional (can be None).
     - If `hitl_approval` is absent/empty, `message` is required.
     """
+
     message: Optional[str] = None
     metadata: Optional[dict] = None
     hitl_approval: Optional[list[HITLApprovalItem]] = None
@@ -57,11 +61,12 @@ class ChatRequestContent(BaseModel):
 class ChatResponseContent(BaseModel):
     """
     Content block of an assistant chat response.
-    
+
     Conditional logic:
     - If `hitl_requested` is provided and non-empty, `message` is optional (can be None).
     - If `hitl_requested` is absent/empty, `message` is required.
     """
+
     message: Optional[str] = None
     metadata: Optional[dict] = None
     hitl_requested: Optional[list[HITLRequestedItem]] = None
@@ -76,20 +81,22 @@ class ChatResponseContent(BaseModel):
 
 # --- Top-level request / response models ---
 
+
 class ChatRequest(BaseModel):
     """
     Incoming user message to POST /chat/.
-    
+
     Auto-generated fields:
     - message_id: generated server-side via uuid7 (NOT supplied by client)
     - timestamp: generated server-side as ISO 8601 string (NOT supplied by client)
-    
+
     Client-supplied fields:
     - user_id: str (will come from JWT in Phase 3; for now accept from body)
     - session_id: mandatory str
     - role: must always be "human"
     - content: ChatRequestContent
     """
+
     user_id: str
     message_id: str = Field(default_factory=generate_message_id)
     session_id: str
@@ -101,18 +108,19 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """
     Outgoing assistant response from POST /chat/.
-    
+
     Auto-generated fields:
     - message_id: generated server-side via uuid7
     - timestamp: generated server-side as ISO 8601 string
-    
+
     Populated from request context:
     - user_id: echoed from request
     - session_id: echoed from request
-    
+
     Hardcoded:
     - role: always "assistant"
     """
+
     user_id: str
     message_id: str = Field(default_factory=generate_message_id)
     session_id: str

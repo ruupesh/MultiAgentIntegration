@@ -16,18 +16,16 @@ async def chat(
 ) -> ChatResponse:
     """
     Conversation endpoint.
-    
+
     Receives a user message, processes it (Phase 2), and returns an assistant response.
     Requires a Bearer token in the Authorization header.
     """
     try:
         session_id = request.session_id
         user_id = request.user_id
-        
+
         session = await session_service.get_session(
-            app_name="orchestrator_api",
-            user_id=user_id,
-            session_id=session_id
+            app_name="orchestrator_api", user_id=user_id, session_id=session_id
         )
         logger.info("Session retrieved", session=session)
         if not session:
@@ -39,14 +37,15 @@ async def chat(
                 state={
                     "auth_token": current_user.get("token"),
                     "conversation_history": [],
-                }
+                },
             )
         logger.info("Session created", session=session)
         response = await process_chat_message(request, session)
-        return response    
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/chat/session/{session_id}")
 async def get_session_info(
     session_id: str,
@@ -57,7 +56,7 @@ async def get_session_info(
         session = await session_service.get_session(
             app_name="orchestrator_api",
             user_id=current_user.get("user_id"),
-            session_id=session_id
+            session_id=session_id,
         )
         return {
             "session": session,

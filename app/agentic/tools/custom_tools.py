@@ -25,7 +25,7 @@ async def check_prime(nums: list[int]) -> str:
         if is_prime:
             primes.add(number)
     return (
-        'No prime numbers found.'
+        "No prime numbers found."
         if not primes
         else f"{', '.join(str(num) for num in primes)} are prime numbers."
     )
@@ -77,7 +77,11 @@ def write_to_disk(filename: str, content: str) -> str:
         data = json.loads(content)
         if isinstance(data, list) and all(isinstance(item, dict) for item in data):
             # Assume it's a list of dictionaries, convert to CSV
-            output_filename = filename.replace(".json", ".csv") if filename.endswith(".json") else filename
+            output_filename = (
+                filename.replace(".json", ".csv")
+                if filename.endswith(".json")
+                else filename
+            )
             with open(output_filename, "w", newline="", encoding="utf-8") as f:
                 if data:
                     fieldnames = data[0].keys()
@@ -100,14 +104,15 @@ def write_to_disk(filename: str, content: str) -> str:
             return f"Error writing file '{filename}': {e}"
     except Exception as e:
         return f"Error writing file '{filename}': {e}"
-    
+
+
 async def get_jobs_listings(company_name: str, role: str) -> str:
     """Generate dummy job data for a given company name and role.
-    
+
     Args:
         company_name: The name of the company to generate jobs for.
         role: The job role or position to generate listings for.
-    
+
     Returns:
         A JSON string containing a list of job dictionaries with title, link, and snippet.
     """
@@ -115,36 +120,35 @@ async def get_jobs_listings(company_name: str, role: str) -> str:
         {
             "title": f"Senior {role} at {company_name}",
             "link": f"https://careers.{company_name.lower().replace(' ', '')}.com/job/senior-{role.lower().replace(' ', '-')}",
-            "snippet": f"We are hiring a Senior {role} at {company_name}. Lead our team and build scalable solutions."
+            "snippet": f"We are hiring a Senior {role} at {company_name}. Lead our team and build scalable solutions.",
         },
         {
             "title": f"{role} at {company_name}",
             "link": f"https://careers.{company_name.lower().replace(' ', '')}.com/job/{role.lower().replace(' ', '-')}",
-            "snippet": f"Join {company_name} as a {role}. Drive innovation in a fast-paced environment."
+            "snippet": f"Join {company_name} as a {role}. Drive innovation in a fast-paced environment.",
         },
         {
             "title": f"Principal {role} at {company_name}",
             "link": f"https://careers.{company_name.lower().replace(' ', '')}.com/job/principal-{role.lower().replace(' ', '-')}",
-            "snippet": f"Exciting opportunity at {company_name} for a Principal {role}. Work on cutting-edge projects."
+            "snippet": f"Exciting opportunity at {company_name} for a Principal {role}. Work on cutting-edge projects.",
         },
         {
             "title": f"Junior {role} at {company_name}",
             "link": f"https://careers.{company_name.lower().replace(' ', '')}.com/job/junior-{role.lower().replace(' ', '-')}",
-            "snippet": f"{company_name} is looking for a Junior {role} to join our growing team."
+            "snippet": f"{company_name} is looking for a Junior {role} to join our growing team.",
         },
         {
             "title": f"{role} (Remote) at {company_name}",
             "link": f"https://careers.{company_name.lower().replace(' ', '')}.com/job/{role.lower().replace(' ', '-')}-remote",
-            "snippet": f"Work remotely as a {role} at {company_name}. Flexible schedule and great benefits."
+            "snippet": f"Work remotely as a {role} at {company_name}. Flexible schedule and great benefits.",
         },
         {
             "title": f"{role} - Contract at {company_name}",
             "link": f"https://careers.{company_name.lower().replace(' ', '')}.com/job/{role.lower().replace(' ', '-')}-contract",
-            "snippet": f"Contract opportunity for a {role} at {company_name}. 6-month engagement with potential extension."
-        }
+            "snippet": f"Contract opportunity for a {role} at {company_name}. 6-month engagement with potential extension.",
+        },
     ]
     return json.dumps(dummy_jobs)
-
 
 
 async def write_to_disk(filename: str, content: str) -> str:
@@ -163,7 +167,11 @@ async def write_to_disk(filename: str, content: str) -> str:
         data = json.loads(content)
         if isinstance(data, list) and all(isinstance(item, dict) for item in data):
             # Assume it's a list of dictionaries, convert to CSV
-            output_filename = filename.replace(".json", ".csv") if filename.endswith(".json") else filename
+            output_filename = (
+                filename.replace(".json", ".csv")
+                if filename.endswith(".json")
+                else filename
+            )
             with open(output_filename, "w", newline="", encoding="utf-8") as f:
                 if data:
                     fieldnames = data[0].keys()

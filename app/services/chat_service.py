@@ -1,4 +1,3 @@
-
 from google.adk.sessions import Session
 from google.genai import types
 from google.adk.runners import Runner
@@ -9,21 +8,19 @@ from app.models.schemas.chat import (
     ChatRequest,
     ChatResponse,
     ChatResponseContent,
-    HITLRequestedItem
+    HITLRequestedItem,
 )
 from app.utils.logging import logger
 
-async def process_chat_message(
-    request: ChatRequest,
-    session: Session
-) -> ChatResponse:
+
+async def process_chat_message(request: ChatRequest, session: Session) -> ChatResponse:
     """
     MOCK chat processing service.
-    
+
     Phase 1 behavior:
     - Returns a static mock response echoing the session context.
     - Does not perform any real processing.
-    
+
     Phase 2 TODO:
     - Integrate with LLM / orchestration engine.
     - Implement real conversation logic.
@@ -34,8 +31,7 @@ async def process_chat_message(
         if request.content.message:
             logger.info("Received user message")
             new_message = types.Content(
-                role="user",
-                parts=[types.Part(text=request.content.message)]
+                role="user", parts=[types.Part(text=request.content.message)]
             )
         elif request.content.hitl_approval:
             logger.info("Received HITL approval response")
@@ -51,16 +47,15 @@ async def process_chat_message(
                         function_response=types.FunctionResponse(
                             id=hitl_obj.function_id,
                             name=hitl_obj.function_name,
-                            response=tool_confirmation_response
+                            response=tool_confirmation_response,
                         )
                     )
                 )
-            new_message = types.Content(
-                role="user",
-                parts=hitl_update
-            )
+            new_message = types.Content(role="user", parts=hitl_update)
         else:
-            raise ValueError("Either message or hitl_approval must be provided in the request content.")
+            raise ValueError(
+                "Either message or hitl_approval must be provided in the request content."
+            )
 
         # Run the agent and collect response
         response_text = None
@@ -68,31 +63,38 @@ async def process_chat_message(
         events = []
         root_agent = RootAgent(session.state.get("auth_token"), request)
         app = root_agent.get_root_app()
-        runner = Runner(
-            app=app,
-            session_service=session_service
-        )
+        runner = Runner(app=app, session_service=session_service)
         async for event in runner.run_async(
-            user_id=request.user_id,
-            session_id=session.id,
-            new_message=new_message
+            user_id=request.user_id, session_id=session.id, new_message=new_message
         ):
             events.append(event)
             if event.content and event.content.parts:
                 for part in event.content.parts:
-                    if hasattr(part, 'text') and part.text:
+                    if hasattr(part, "text") and part.text:
                         response_text = part.text
-                    if hasattr(part, "function_call") and part.function_call and hasattr(part.function_call, "args") and part.function_call.args and "originalFunctionCall" in part.function_call.args:
+                    if (
+                        hasattr(part, "function_call")
+                        and part.function_call
+                        and hasattr(part.function_call, "args")
+                        and part.function_call.args
+                        and "originalFunctionCall" in part.function_call.args
+                    ):
                         hitl_requests.append(
                             HITLRequestedItem(
                                 function_id=part.function_call.id,
                                 function_name=part.function_call.name,
-                                confirmed=part.function_call.args.get("toolConfirmation", {}).get("confirmed", False),
-                                payload=part.function_call.args.get("originalFunctionCall", {}).get("args"),
-                                hint=part.function_call.args.get("toolConfirmation", {}).get("hint")
+                                confirmed=part.function_call.args.get(
+                                    "toolConfirmation", {}
+                                ).get("confirmed", False),
+                                payload=part.function_call.args.get(
+                                    "originalFunctionCall", {}
+                                ).get("args"),
+                                hint=part.function_call.args.get(
+                                    "toolConfirmation", {}
+                                ).get("hint"),
                             )
                         )
-        
+
         content = ChatResponseContent(
             message=response_text,
             metadata={"events": events},

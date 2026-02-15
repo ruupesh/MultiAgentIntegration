@@ -9,13 +9,13 @@ async def get_current_user(
 ) -> dict:
     """
     MOCK JWT authentication dependency.
-    
+
     Phase 1 behavior:
     - Accepts ANY Bearer token without validation.
     - Returns a hardcoded mock user dict: {"user_id": "mock-user-001", "email": "mock@example.com"}
     - Still requires the Authorization header to be present (returns 403 if missing)
       so the API contract is established early.
-    
+
     Phase 3 TODO:
     - Decode and validate the JWT token using python-jose.
     - Extract user_id and claims from the token payload.

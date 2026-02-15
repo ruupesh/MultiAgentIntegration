@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings
 
 
-
 class Settings(BaseSettings):
     APP_NAME: str = "TheOrchestrator"
     API_V1_PREFIX: str = "/api/v1"

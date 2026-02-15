@@ -94,7 +94,11 @@ def get_mcp_conf(config_path: Optional[str | Path] = None) -> list[dict[str, Any
                 cfg[key] = Template(value).safe_substitute(os.environ)
             elif isinstance(value, list):
                 cfg[key] = [
-                    Template(v).safe_substitute(os.environ) if isinstance(v, str) and "${" in v else v
+                    (
+                        Template(v).safe_substitute(os.environ)
+                        if isinstance(v, str) and "${" in v
+                        else v
+                    )
                     for v in value
                 ]
 
@@ -117,14 +121,15 @@ class McpAdapter:
         agent = Agent(..., tools=toolsets)
     """
 
-    def __init__(self, config_path: Optional[str | Path] = None, auth_token: Optional[str] = None) -> None:
+    def __init__(
+        self, config_path: Optional[str | Path] = None, auth_token: Optional[str] = None
+    ) -> None:
         self._config_path = config_path
         self._auth_token = auth_token
         self._raw_configs: list[dict[str, Any]] = get_mcp_conf(self._config_path)
         self._configs: list[McpToolsetConfig] = [
             McpToolsetConfig(**cfg) for cfg in self._raw_configs
         ]
-
 
     def get_mcp_tool_sets(self) -> list[McpToolset]:
         """Build and return a list of ``McpToolset`` objects from configuration.
@@ -140,14 +145,18 @@ class McpAdapter:
                         required fields are missing for the chosen type.
         """
         toolsets: list[McpToolset] = []
-        logger.info("Creating MCP toolset from configuration", configuration=self._configs)
+        logger.info(
+            "Creating MCP toolset from configuration", configuration=self._configs
+        )
         for cfg in self._configs:
             connection_params = self._build_connection_params(cfg)
             toolset = McpToolset(
                 connection_params=connection_params,
                 tool_filter=cfg.tool_filter,
             )
-            logger.info("Created McpToolset", name=cfg.name, connection_type=cfg.connection_type)
+            logger.info(
+                "Created McpToolset", name=cfg.name, connection_type=cfg.connection_type
+            )
             toolsets.append(toolset)
 
         return toolsets
@@ -211,9 +220,7 @@ class McpAdapter:
     def _build_stdio_params(self, cfg: McpToolsetConfig) -> StdioConnectionParams:
         """Build ``StdioConnectionParams`` from config."""
         if not cfg.command:
-            raise ValueError(
-                f"'command' is required for stdio toolset '{cfg.name}'"
-            )
+            raise ValueError(f"'command' is required for stdio toolset '{cfg.name}'")
         return StdioConnectionParams(
             server_params=StdioServerParameters(
                 command=cfg.command,
@@ -236,7 +243,9 @@ class McpAdapter:
         # Inject auth header when authentication is enabled
         if cfg.authentication_flag:
             if not self._auth_token:
-                raise ValueError("Authentication flag is set but no auth token was provided")
+                raise ValueError(
+                    "Authentication flag is set but no auth token was provided"
+                )
             headers["Authorization"] = f"Bearer {self._auth_token}"
 
         return StreamableHTTPConnectionParams(
@@ -249,15 +258,15 @@ class McpAdapter:
     def _build_sse_params(self, cfg: McpToolsetConfig) -> SseConnectionParams:
         """Build ``SseConnectionParams`` from config."""
         if not cfg.url:
-            raise ValueError(
-                f"'url' is required for sse toolset '{cfg.name}'"
-            )
+            raise ValueError(f"'url' is required for sse toolset '{cfg.name}'")
         headers = dict(cfg.headers) if cfg.headers else {}
 
         # Inject auth header when authentication is enabled
         if cfg.authentication_flag:
             if not self._auth_token:
-                raise ValueError("Authentication flag is set but no auth token was provided")
+                raise ValueError(
+                    "Authentication flag is set but no auth token was provided"
+                )
             headers["Authorization"] = f"Bearer {self._auth_token}"
 
         return SseConnectionParams(
