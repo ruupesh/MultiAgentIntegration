@@ -125,9 +125,6 @@ class McpAdapter:
             McpToolsetConfig(**cfg) for cfg in self._raw_configs
         ]
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def get_mcp_tool_sets(self) -> list[McpToolset]:
         """Build and return a list of ``McpToolset`` objects from configuration.

@@ -36,7 +36,10 @@ async def chat(
                 app_name="orchestrator_api",
                 user_id=user_id,
                 session_id=session_id,
-                state={"auth_token": current_user.get("token")}
+                state={
+                    "auth_token": current_user.get("token"),
+                    "conversation_history": [],
+                }
             )
         logger.info("Session created", session=session)
         response = await process_chat_message(request, session)
@@ -44,3 +47,20 @@ async def chat(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+@router.get("/chat/session/{session_id}")
+async def get_session_info(
+    session_id: str,
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """Return the session info for a session."""
+    try:
+        session = await session_service.get_session(
+            app_name="orchestrator_api",
+            user_id=current_user.get("user_id"),
+            session_id=session_id
+        )
+        return {
+            "session": session,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

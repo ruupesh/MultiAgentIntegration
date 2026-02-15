@@ -25,6 +25,8 @@ from google.adk.agents.remote_a2a_agent import (
     RemoteA2aAgent,
     AGENT_CARD_WELL_KNOWN_PATH,
 )
+from google.adk.agents.invocation_context import InvocationContext
+from a2a.types import Message as A2AMessage
 
 logger = logging.getLogger("google_adk.adapters.remote_a2a_adapter")
 
@@ -175,6 +177,33 @@ class RemoteA2aAdapter:
     # Internal helpers
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _build_meta_provider() -> Any:
+        """Build a metadata provider that forwards ``conversation_history``
+        from the orchestrator's session state to the remote agent via A2A
+        request metadata.
+
+        The returned dict is attached to the JSON-RPC request and arrives
+        on the receiving side as ``RequestContext.metadata``.  The ADK
+        request converter places it into
+        ``RunConfig.custom_metadata['a2a_metadata']``, making it
+        accessible in the remote agent's callbacks via
+        ``callback_context.run_config.custom_metadata['a2a_metadata']``.
+
+        Returns:
+            A callable ``(InvocationContext, A2AMessage) -> dict``.
+        """
+
+        def _provider(
+            ctx: InvocationContext, _message: A2AMessage
+        ) -> dict[str, Any]:
+            conversation_history = list(
+                ctx.session.state.get("conversation_history", [])
+            )
+            return {"conversation_history": conversation_history}
+
+        return _provider
+
     def _build_remote_agent(self, cfg: RemoteAgentConfig) -> RemoteA2aAgent:
         """Construct a ``RemoteA2aAgent`` from a validated config entry.
 
@@ -195,6 +224,7 @@ class RemoteA2aAdapter:
             agent_card=cfg.agent_card_url,
             a2a_client_factory=client_factory,
             full_history_when_stateless=cfg.full_history,
+            a2a_request_meta_provider=self._build_meta_provider(),
         )
 
     def _build_client_factory(self, cfg: RemoteAgentConfig) -> ClientFactory:

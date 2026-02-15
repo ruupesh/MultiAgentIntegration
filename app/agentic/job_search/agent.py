@@ -26,6 +26,9 @@ prompts_dir = os.path.join(src_dir, 'prompts_library')
 
 sys.path.append(tools_dir)
 sys.path.append(prompts_dir)
+utils_dir = os.path.join(src_dir, 'utils')
+sys.path.append(utils_dir)
+from utils.logging import logger
 
 # Import from the new paths
 from job_search_agent import SYSTEM_PROMPT
@@ -51,6 +54,21 @@ def log_conversation_history(callback_context: CallbackContext):
     For A2A agents, this will show the reconstructed message parts sent by RemoteA2aAgent.
     """
     try:
+        # -----------------------------------------------------------------
+        # Hydrate conversation_history from the orchestrator's A2A metadata
+        # into this agent's session state so it is available to the LLM as
+        # context and persists across invocations.
+        # -----------------------------------------------------------------
+        run_config = callback_context.run_config
+        if run_config and run_config.custom_metadata:
+            a2a_meta = run_config.custom_metadata.get("a2a_metadata", {})
+            orchestrator_history = a2a_meta.get("conversation_history")
+            if orchestrator_history:
+                callback_context.state["conversation_history"] = orchestrator_history
+                logger.info(
+                    "Received orchestrator conversation_history", len_of_history=len(orchestrator_history)
+                )
+
         session = callback_context._invocation_context.session
         invocation_id = callback_context._invocation_context.invocation_id
         

@@ -66,7 +66,7 @@ async def process_chat_message(
         response_text = None
         hitl_requests = []
         events = []
-        root_agent = RootAgent(session.state.get("auth_token"))
+        root_agent = RootAgent(session.state.get("auth_token"), request)
         app = root_agent.get_root_app()
         runner = Runner(
             app=app,
