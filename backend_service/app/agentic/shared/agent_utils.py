@@ -17,6 +17,7 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.planners import BuiltInPlanner
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.genai import types
+from a2a.types import AgentCard, AgentCapabilities, AgentSkill
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -406,8 +407,24 @@ def build_a2a_agent(
         before_agent_callback=log_callback,
         after_agent_callback=response_log_callback,
     )
-
-    a2a_app = to_a2a(root_agent, port=port)
+    static_agent_card = AgentCard(
+            name=agent_name,
+            description=description,
+            url=f"http://localhost:{port}/",
+            version="1.0.0",
+            capabilities=AgentCapabilities(),
+            skills=[
+                AgentSkill(
+                    id=agent_name,
+                    name=agent_name.replace("-", " ").title(),
+                    description=description,
+                    tags=[agent_name],
+                )
+            ],
+            default_input_modes=["text/plain"],
+            default_output_modes=["text/plain"],
+        )
+    a2a_app = to_a2a(root_agent, port=port, agent_card=static_agent_card)
     a2a_app.add_middleware(RequestResponseLoggingMiddleware, agent_name=agent_name)
     a2a_app.add_middleware(JWTValidationMiddleware)
 
