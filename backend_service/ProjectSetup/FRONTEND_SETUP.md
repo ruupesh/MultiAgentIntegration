@@ -4,17 +4,17 @@ This guide covers local setup for the Next.js frontend.
 
 ## 1. Prerequisites
 
-Install the following first:
+Install first:
 
-- Node.js 20 or newer
+- Node.js 20+
 - npm
-- The backend API running on `http://localhost:8000`
+- Backend API running on `http://localhost:8000`
 
-Backend setup is documented in [BACKEND_SETUP.md](d:/projects/TheOrc/backend_service/ProjectSetup/BACKEND_SETUP.md).
+Backend setup is documented in [BACKEND_SETUP.md](./BACKEND_SETUP.md).
 
 ## 2. Install Dependencies
 
-From [frontend](d:/projects/TheOrc/frontend):
+From `frontend`:
 
 ```powershell
 npm install
@@ -22,7 +22,7 @@ npm install
 
 ## 3. Configure Environment Variables
 
-Create or update `.env.local` in [frontend](d:/projects/TheOrc/frontend):
+Create or update `frontend/.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
@@ -30,65 +30,51 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 
 This is the base URL used by the UI for all backend API calls.
 
-## 4. Start the Development Server
+## 4. Start Development Server
 
-From [frontend](d:/projects/TheOrc/frontend):
+From `frontend`:
 
 ```powershell
 npm run dev
 ```
 
-The UI starts on:
+UI URL: `http://localhost:3000`
 
-```text
-http://localhost:3000
-```
-
-## 5. Build for Production Validation
-
-To confirm the UI builds successfully:
+## 5. Build Validation
 
 ```powershell
 npm run build
-```
-
-To run the production server locally after a successful build:
-
-```powershell
 npm run start
 ```
 
-## 6. What to Verify in the UI
+## 6. Functional Verification
 
-After both frontend and backend are running:
+After frontend and backend are up:
 
 1. Open `http://localhost:3000`.
-2. Register a new user or log in with an existing user.
-3. Open the Agents page and confirm your agents load.
-4. Open the MCP Tools page and confirm tools load.
-5. Open Marketplace and confirm public listings are visible.
-6. Open Chat and send a test request.
+2. Register or log in.
+3. Verify `/agents` and `/mcp-tools` list data.
+4. Verify `/marketplace` lists published items.
+5. Verify `/chat` can send messages.
 
 ## 7. Troubleshooting
 
-### Frontend cannot reach the backend
+### Frontend cannot reach backend
 
-- Confirm the backend is running on `localhost:8000`.
-- Confirm `.env.local` contains the correct `NEXT_PUBLIC_API_URL`.
-- Restart `npm run dev` after editing `.env.local`.
+- Confirm backend is on `localhost:8000`.
+- Confirm `NEXT_PUBLIC_API_URL` in `.env.local`.
+- Restart dev server after env changes.
 
-### UI loads but chat or marketplace is empty
+### UI loads but data pages are empty
 
-- Confirm the backend database has been initialized with `python -m scripts.init_db`.
-- Confirm marketplace demo scripts were run if you expect sample marketplace data.
-- Confirm the remote agents are running if you expect orchestrated chat to use them.
+- Confirm backend migrations were applied.
+- Confirm you have seeded data if your test flow expects demo marketplace content.
+- Confirm remote agent services are running if chat should use sub-agents.
 
-### Port `3000` is already in use
-
-Run on another port:
+### Port `3000` is occupied
 
 ```powershell
 npx next dev --port 3001
 ```
 
-If you do this, open `http://localhost:3001` in the browser.
+Then open `http://localhost:3001`.

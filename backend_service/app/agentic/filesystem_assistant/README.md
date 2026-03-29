@@ -18,8 +18,13 @@ Uses `@modelcontextprotocol/server-filesystem` (npx) — the official Filesystem
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. Set `FILESYSTEM_ALLOWED_PATHS` to comma-separated list of directories the agent can access.
+Set env in `backend_service/.env` (or override with `app/agentic/filesystem_assistant/.env`):
+
+```env
+FILESYSTEM_ALLOWED_PATHS=D:/projects/TheOrc,D:/temp
+```
+
+`FILESYSTEM_ALLOWED_PATHS` is comma-separated. If unset, the current working directory is used.
 
 ## Security
 
@@ -28,7 +33,7 @@ The filesystem server only allows access to explicitly configured paths. It will
 ## Running
 
 ```bash
-uvicorn app.agentic.filesystem_assistant.agent:a2a_app --host 0.0.0.0 --port 8003
+uvicorn app.agentic.filesystem_assistant.agent:a2a_app --host localhost --port 8003
 ```
 
 ## Port: 8003

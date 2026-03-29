@@ -14,7 +14,7 @@ This runbook prepares a **clean local demo database** with:
 
 ## What each script does
 
-1. `scripts/seed_users.py.py`
+1. `scripts/seed_users.py`
    - Creates tables if missing.
    - **Clears all existing rows** (destructive, for local demo use).
    - Creates exactly 3 users:
@@ -34,6 +34,11 @@ This runbook prepares a **clean local demo database** with:
    - Reads MCP configs from `app/agentic/adapters/mcp_conf.yml`.
    - Seeds all MCP tools and distributes ownership equally as possible across user1/user2/user3.
    - Publishes all seeded MCP tools to marketplace.
+
+Notes:
+
+- `scripts/seed_agent_listings.py` and `scripts/migrate_and_seed_marketplace.py` are parallel variants of steps 2 and 3.
+- Use one consistent set in a run; this runbook uses `seed_agents_and_market.py` and `seed_mcp_and_market.py`.
 
 ## Run Order (manual)
 

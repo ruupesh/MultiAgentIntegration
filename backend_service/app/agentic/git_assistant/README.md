@@ -17,14 +17,18 @@ Uses `mcp-server-git` (uvx/pip) — the official Git MCP server.
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. Set `GIT_REPO_PATH` to the path of the Git repository to analyze.
-3. Install: `pip install mcp-server-git`
+Set env in `backend_service/.env` (or override in `app/agentic/git_assistant/.env`):
+
+```env
+GIT_REPO_PATH=D:/projects/TheOrc
+```
+
+`GIT_REPO_PATH` must point to a valid Git repository.
 
 ## Running
 
 ```bash
-uvicorn app.agentic.git_assistant.agent:a2a_app --host 0.0.0.0 --port 8009
+uvicorn app.agentic.git_assistant.agent:a2a_app --host localhost --port 8009
 ```
 
 ## Port: 8009

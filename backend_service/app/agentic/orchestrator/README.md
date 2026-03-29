@@ -1,39 +1,42 @@
 # Supervisor (Orchestrator Agent)
 
-The Supervisor is the central intelligence of the multi-agent system. It acts as a project manager that decomposes complex user requests into structured execution plans, delegates tasks to specialized sub-agents, and utilizes internal tools to deliver finalized solutions.
+The Supervisor is the root orchestration agent used by backend chat processing. It is not run as a standalone A2A service.
 
-## Features
+## Runtime Flow
 
-- **Task Decomposition**: Breaks down high-level user prompts into atomic, logical steps.
-- **Agent Delegation**: Automatically hands off specialized tasks to sub-agents like the `job_search_assistant`.
-- **Tool Integration**: Uses built-in tools for calculations, weather checks, and file path resolution.
-- **Synthesis**: Combines outputs from multiple sources into a coherent final response.
+1. `tool_agent_discovery` classifies the user request and outputs routing JSON.
+2. `Orchestrator` reads that routing result and dynamically configures:
+   - `sub_agents` for single-agent handoff flows
+   - `AgentTool` wrappers for multi-agent call-and-return flows
+   - direct MCP toolsets when requested and available
 
-## Prerequisites
+The root is a `SequentialAgent`: discovery -> orchestrator.
 
-Ensure you have the following environment variables set in your `.env` file:
+## Built-in Tools
 
-- `AGENT_MODEL`: The LLM model to use (e.g., `gemini/gemini-1.5-pro` or `gpt-4o`).
+- `check_prime` (HITL confirmation enabled)
+- `check_weather`
+- `find_file_path` (HITL confirmation enabled)
 
-## Sub-Agents
+## Remote Agents and MCP Sources
 
-- **Job Search Assistant**: A remote agent (running on port 8001) that finds job opportunities and saves them to disk.
+- Remote agent catalog comes from `app/agentic/adapters/remote_agents_conf.yml` or DB overrides.
+- MCP tool catalog comes from `app/agentic/adapters/mcp_conf.yml` or DB overrides.
+- Direct MCP use in discovery is gated by `ORCHESTRATOR_ENABLE_DIRECT_MCP_TOOLS`.
 
-## Tools
+## Environment Variables
 
-- `check_prime`: Checks if a list of numbers are prime.
-- `check_weather`: Retrieves real-time weather data for a given location.
-- `find_file_path`: Resolves local file paths.
+- `AGENT_MODEL` (optional, defaults to `gemini/gemini-2.5-flash`)
+- `ORCHESTRATOR_ENABLE_DIRECT_MCP_TOOLS` (`true`/`false`, default `false`)
+- `AGENT_REASONING_EFFORT`, `AGENT_THINKING_LEVEL`, `AGENT_INCLUDE_THOUGHTS` (optional)
 
 ## How to Run
 
-The Orchestrator is typically run using the ADK Web interface for interactive testing.
+Start the backend API from `backend_service`:
 
-1. Ensure the sub-agents (e.g., `job_search_assistant`) are already running.
-2. From the project root directory, run:
-   ```powershell
-   adk web src/agents
-   ```
+```powershell
+python run.py
+```
 
-This will launch a web interface where you can interact with the Supervisor agent and observe how it orchestrates tasks across tools and sub-agents.
+The orchestrator is invoked through chat API requests handled by `app/services/chat_service.py`.
 

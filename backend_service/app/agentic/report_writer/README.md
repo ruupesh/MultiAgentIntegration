@@ -13,18 +13,21 @@ Also uses the custom `write_to_disk` tool for saving reports.
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. No additional authentication required.
+The agent loads env from `backend_service/.env` and optional agent-local `.env` override.
+
+Requirements:
+
+- Node.js and `npx` available on PATH (for `fetch-mcp`)
+- No additional authentication required for public web research
 
 ## Output Format
 
-Reports are saved as Markdown files with the naming convention:
-`report_<topic>_YYYY-MM-DD.md`
+Reports are saved using the filename passed to `write_to_disk`.
 
 ## Running
 
 ```bash
-uvicorn app.agentic.report_writer.agent:a2a_app --host 0.0.0.0 --port 8011
+uvicorn app.agentic.report_writer.agent:a2a_app --host localhost --port 8011
 ```
 
 ## Port: 8011

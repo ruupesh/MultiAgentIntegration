@@ -11,8 +11,9 @@ Uses `@modelcontextprotocol/server-sequential-thinking` (npx) — the official S
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. No additional authentication required.
+The agent loads env from `backend_service/.env` and optional agent-local `.env` override.
+
+No additional authentication is required.
 
 ## Use Cases
 - Complex multi-step problem decomposition
@@ -24,7 +25,7 @@ Uses `@modelcontextprotocol/server-sequential-thinking` (npx) — the official S
 ## Running
 
 ```bash
-uvicorn app.agentic.reasoning_assistant.agent:a2a_app --host 0.0.0.0 --port 8007
+uvicorn app.agentic.reasoning_assistant.agent:a2a_app --host localhost --port 8007
 ```
 
 ## Port: 8007

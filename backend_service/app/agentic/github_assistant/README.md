@@ -19,15 +19,21 @@ Uses `@modelcontextprotocol/server-github` (npx) — the official GitHub MCP ser
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. Generate a GitHub Personal Access Token at https://github.com/settings/tokens
-3. The token needs `repo`, `read:org`, and `read:user` scopes.
+The agent loads env in this order:
+
+1. `backend_service/.env`
+2. `app/agentic/github_assistant/.env` (optional override)
+
+Required when using GitHub tools:
+
+- `GITHUB_PERSONAL_ACCESS_TOKEN`
+
+Recommended token scopes: `repo`, `read:org`, `read:user`.
 
 ## Running
 
 ```bash
-# Standalone (A2A server on port 8002)
-uvicorn app.agentic.github_assistant.agent:a2a_app --host 0.0.0.0 --port 8002
+uvicorn app.agentic.github_assistant.agent:a2a_app --host localhost --port 8002
 ```
 
 ## Port: 8002

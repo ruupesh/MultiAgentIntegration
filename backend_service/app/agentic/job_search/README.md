@@ -1,43 +1,35 @@
 # Job Search Assistant Agent
 
-A specialized agent designed to find job opportunities on the web and persist them to disk in CSV format. This agent is built using the Google ADK and exposed as an Agent-to-Agent (A2A) service.
+A specialized A2A agent that finds job opportunities on the web and can persist results to disk.
 
 ## Features
 
-- **Web Search**: Uses the DuckDuckGo MCP server to find real-time job listings.
-- **Data Persistence**: Automatically converts search results into CSV format and saves them to the local file system.
-- **A2A Service**: Runs as a `uvicorn` server, allowing it to be called by other agents (like the Orchestrator).
+- Web search via DuckDuckGo MCP.
+- `write_to_disk` helper tool for writing output to local files.
+- JSON list payloads written through `write_to_disk` are converted to CSV.
 
 ## Prerequisites
 
-Ensure you have the following environment variables set in your `.env` file:
+Set these in `backend_service/.env` (or override in `app/agentic/job_search/.env`):
 
-- `AGENT_MODEL`: The LLM model to use (e.g., `gemini/gemini-1.5-flash`).
-- `DDG_MCP_PATH`: The local path to your DuckDuckGo MCP server (e.g., `d:/projects/MultiAgent/venv/Lib/site-packages/duckduckgo_mcp_server/server.py`).
+- `AGENT_MODEL` (optional)
+- `DDG_MCP_PATH` (required for DuckDuckGo MCP startup)
 
-## Installation
+Example:
 
-Make sure you are in the virtual environment and have the dependencies installed:
-
-```powershell
-pip install -r src/requirements.txt
+```env
+DDG_MCP_PATH=D:/projects/TheOrc/backend_service/venv/Lib/site-packages/duckduckgo_mcp_server/server.py
 ```
 
-## How to Run
+## Run
 
-1. Navigate to the `src` directory:
-   ```powershell
-   cd \app
-   ```
+From `backend_service`:
 
-2. Start the agent server:
-   ```powershell
-   uvicorn agentic.job_search.agent:a2a_app --host localhost --port 8001
-   ```
+```powershell
+uvicorn app.agentic.job_search.agent:a2a_app --host localhost --port 8001
+```
 
-The agent will be available at `http://localhost:8001`. You can view the agent card at `http://localhost:8001/.well-known/agent-card.json`.
+Endpoints:
 
-## Tool Usage
-
-- **DuckDuckGo MCP**: Used for searching the web.
-- **write_to_disk**: A custom tool that takes a filename and content. If the content is a JSON list of job objects, it converts them to CSV.
+- Base URL: `http://localhost:8001`
+- Agent card: `http://localhost:8001/.well-known/agent.json`

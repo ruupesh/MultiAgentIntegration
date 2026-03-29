@@ -22,14 +22,18 @@ Uses `@modelcontextprotocol/server-puppeteer` (npx) — the official Puppeteer M
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. Ensure Chrome/Chromium is installed and accessible.
-3. No additional authentication required.
+The agent loads env from `backend_service/.env` and optional agent-local `.env` override.
+
+Requirements:
+
+- Chrome/Chromium installed
+- Node.js and `npx` available on PATH
+- No additional authentication required
 
 ## Running
 
 ```bash
-uvicorn app.agentic.browser_automation.agent:a2a_app --host 0.0.0.0 --port 8008
+uvicorn app.agentic.browser_automation.agent:a2a_app --host localhost --port 8008
 ```
 
 ## Port: 8008

@@ -12,14 +12,14 @@ Uses `mcp-server-time` (uvx/pip) — the official Time MCP server.
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. No additional authentication required.
-3. Install: `pip install mcp-server-time`
+The agent loads env from `backend_service/.env` and optional agent-local `.env` override.
+
+No additional authentication is required.
 
 ## Running
 
 ```bash
-uvicorn app.agentic.time_assistant.agent:a2a_app --host 0.0.0.0 --port 8010
+uvicorn app.agentic.time_assistant.agent:a2a_app --host localhost --port 8010
 ```
 
 ## Port: 8010

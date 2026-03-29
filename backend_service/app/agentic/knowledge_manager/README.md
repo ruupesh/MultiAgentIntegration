@@ -19,14 +19,18 @@ Uses `@modelcontextprotocol/server-memory` (npx) — the official Memory MCP ser
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. No additional authentication required.
-3. The knowledge graph persists in a local JSON file managed by the MCP server.
+The agent loads env from `backend_service/.env` and then optional agent-local `.env` override.
+
+No additional authentication is required for the memory MCP server.
+
+Persistence note:
+
+- Memory data is written to the configured memory storage path used by the memory MCP server.
 
 ## Running
 
 ```bash
-uvicorn app.agentic.knowledge_manager.agent:a2a_app --host 0.0.0.0 --port 8005
+uvicorn app.agentic.knowledge_manager.agent:a2a_app --host localhost --port 8005
 ```
 
 ## Port: 8005

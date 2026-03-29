@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TheOrc Frontend
 
-## Getting Started
+Next.js 16 + React 19 frontend for authentication, agent management, MCP tool management, marketplace, and orchestrated chat.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router
+- TypeScript
+- Material UI
+- Redux Toolkit + RTK Query
+- React Hook Form + Zod
+
+## Prerequisites
+
+- Node.js 20+
+- npm
+- Backend API running on `http://localhost:8000`
+
+## Setup
+
+From `frontend`:
+
+```bash
+npm install
+```
+
+Create `frontend/.env.local`:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
+
+## Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-## Learn More
+## App Routes
 
-To learn more about Next.js, take a look at the following resources:
+- `/login`
+- `/register`
+- `/agents`
+- `/mcp-tools`
+- `/marketplace`
+- `/chat`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Key Frontend Modules
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `src/store/api/*` for backend API slices (auth, agents, MCP tools, marketplace, chat)
+- `src/store/slices/chatSlice.ts` for chat UI state
+- `src/components/*` for page and feature components
+- `src/lib/auth.ts` for token and auth helpers
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- If you change `NEXT_PUBLIC_API_URL`, restart the dev server.
+- Marketplace and chat behavior depends on backend data and agent services being up.

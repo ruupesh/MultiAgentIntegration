@@ -16,14 +16,18 @@ Uses `mcp-server-sqlite` (uvx/pip) — the official SQLite MCP server.
 
 ## Setup
 
-1. Copy `.env.sample` to `.env` and fill in values.
-2. Set `SQLITE_DB_PATH` to the path of your SQLite database file.
-3. Install: `pip install mcp-server-sqlite`
+Set env in `backend_service/.env` (or override in `app/agentic/database_analyst/.env`):
+
+```env
+SQLITE_DB_PATH=D:/projects/TheOrc/backend_service/local.db
+```
+
+If not set, the SQLite MCP server defaults to `database.db` in the current working directory.
 
 ## Running
 
 ```bash
-uvicorn app.agentic.database_analyst.agent:a2a_app --host 0.0.0.0 --port 8006
+uvicorn app.agentic.database_analyst.agent:a2a_app --host localhost --port 8006
 ```
 
 ## Port: 8006
