@@ -412,6 +412,58 @@ Then open:
 http://localhost:3000
 ```
 
+## TheOrc Demo Walkthrough (Screenshots)
+
+The screenshots below show a real end-to-end interaction: user login, capability inspection, request execution, and orchestrator routing logs.
+
+### 1. Login Screen
+
+The user starts at the authentication page and signs in to access their tenant-scoped agent/tool catalog.
+
+![TheOrc Demo Login](TheOrcDemo/Screenshot-1.png)
+
+### 2. Chat Request and Final Result
+
+After signing in, the user submits a multi-step prompt in chat. The assistant completes the task and confirms that output was generated and stored.
+
+![TheOrc Demo Chat Result](TheOrcDemo/Screenshot-2.png)
+
+### 3. Configure Chat - Agent Selection
+
+The Configure Chat modal lets the user enable or disable specific remote agents for the current conversation, constraining orchestration before execution.
+
+![TheOrc Demo Configure Agents](TheOrcDemo/Screenshot-3.png)
+
+### 4. Configure Chat - MCP Tool Selection
+
+The same modal exposes MCP tool controls, allowing request-level tool allowlisting (for example, enabling `duckduckgo_search` for web discovery tasks).
+
+![TheOrc Demo Configure MCP Tools](TheOrcDemo/Screenshot-4.png)
+
+### 5. Runtime Logs - Discovery and Routing
+
+Backend logs show the two-stage flow in action: the root sequential agent is built with available catalogs, then discovery selects a strategy and concrete agents/tools for the request.
+
+![TheOrc Demo Runtime Logs](TheOrcDemo/Screenshot-5.png)
+
+### 6. Agents Control Plane
+
+The Agents page shows user-visible remote specialists (host/port, timeout, auth flags) and supports management operations.
+
+![TheOrc Demo Agents Page](TheOrcDemo/Screenshot-6.png)
+
+### 7. MCP Tools Control Plane
+
+The MCP Tools page displays configured tool servers, launch commands, transport type, and timeout settings.
+
+![TheOrc Demo MCP Tools Page](TheOrcDemo/Screenshot-7.png)
+
+### 8. Marketplace Catalog and Installation Flow
+
+The Marketplace page shows published capabilities across users with filters for type, visibility, ownership, and sort order, plus `Install` / `Uninstall` / `Remove` actions for lifecycle management.
+
+![TheOrc Demo Marketplace Page](TheOrcDemo/Screenshot-8.png)
+
 ## Why This Architecture Is Useful
 
 TheOrc is interesting because it treats AI execution as a runtime system, not as a single prompt surface.
