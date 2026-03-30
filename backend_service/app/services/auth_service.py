@@ -40,9 +40,7 @@ async def register_user(
     return user
 
 
-async def authenticate_user(
-    db: AsyncSession, email: str, password: str
-) -> User | None:
+async def authenticate_user(db: AsyncSession, email: str, password: str) -> User | None:
     """Authenticate a user by email and password. Returns User or None."""
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -61,7 +59,10 @@ def create_user_token(user: User) -> str:
 
 
 async def get_or_create_user_session(
-    db: AsyncSession, user_id: uuid.UUID, adk_session_id: str, app_name: str = "orchestrator_api"
+    db: AsyncSession,
+    user_id: uuid.UUID,
+    adk_session_id: str,
+    app_name: str = "orchestrator_api",
 ) -> UserSession:
     """Get or create a UserSession record linking an ADK session to a user."""
     result = await db.execute(
@@ -102,3 +103,37 @@ async def validate_session_ownership(
         )
     )
     return result.scalar_one_or_none() is not None
+
+
+async def get_user_session_by_adk_session_id(
+    db: AsyncSession, adk_session_id: str
+) -> UserSession | None:
+    """Fetch a UserSession by ADK session ID."""
+    result = await db.execute(
+        select(UserSession).where(UserSession.adk_session_id == adk_session_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def delete_user_session(
+    db: AsyncSession, user_id: uuid.UUID, adk_session_id: str
+) -> bool:
+    """Delete a UserSession mapping if it belongs to the user."""
+    result = await db.execute(
+        select(UserSession).where(
+            UserSession.adk_session_id == adk_session_id,
+            UserSession.user_id == user_id,
+        )
+    )
+    user_session = result.scalar_one_or_none()
+    if not user_session:
+        return False
+
+    await db.delete(user_session)
+    await db.commit()
+    logger.info(
+        "Deleted user session mapping",
+        user_id=str(user_id),
+        adk_session_id=adk_session_id,
+    )
+    return True

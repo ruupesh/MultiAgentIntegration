@@ -6,11 +6,24 @@ import IconButton from "@mui/material/IconButton";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweepOutlined";
 import ChatWindow from "@/components/chat/ChatWindow";
 import ChatInput from "@/components/chat/ChatInput";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearMessages } from "@/store/slices/chatSlice";
+import { useClearSessionMutation } from "@/store/api/chatApi";
 
 export default function ChatPage() {
   const dispatch = useAppDispatch();
+  const { sessionId } = useAppSelector((state) => state.chat);
+  const [clearSession] = useClearSessionMutation();
+
+  const handleClearConversation = async () => {
+    try {
+      await clearSession(sessionId).unwrap();
+    } catch {
+      // Always clear local UI state even if backend session cleanup fails.
+    } finally {
+      dispatch(clearMessages());
+    }
+  };
 
   return (
     <Box
@@ -37,7 +50,7 @@ export default function ChatPage() {
         <IconButton
           size="small"
           title="Clear conversation"
-          onClick={() => dispatch(clearMessages())}
+          onClick={handleClearConversation}
         >
           <DeleteSweepIcon fontSize="small" />
         </IconButton>

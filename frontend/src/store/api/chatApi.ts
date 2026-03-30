@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi";
-import type { ChatRequest, ChatResponse } from "@/lib/types";
+import type { ChatClearResponse, ChatRequest, ChatResponse } from "@/lib/types";
 
 export const chatApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,7 +10,13 @@ export const chatApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    clearSession: builder.mutation<ChatClearResponse, string>({
+      query: (sessionId) => ({
+        url: `/chat/session/${sessionId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
-export const { useSendMessageMutation } = chatApi;
+export const { useSendMessageMutation, useClearSessionMutation } = chatApi;

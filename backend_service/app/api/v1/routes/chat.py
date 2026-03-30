@@ -2,7 +2,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import get_current_user
@@ -10,7 +10,12 @@ from app.db.database import get_db
 from app.models.schemas.chat import ChatRequest, ChatResponse
 from app.services.chat_service import process_chat_message
 from app.services.session_service import session_service
-from app.services.auth_service import get_or_create_user_session, validate_session_ownership
+from app.services.auth_service import (
+    delete_user_session,
+    get_or_create_user_session,
+    get_user_session_by_adk_session_id,
+    validate_session_ownership,
+)
 from app.services.agent_service import get_user_agents
 from app.services.mcp_tool_service import get_user_mcp_tools
 from app.utils.logging import logger
@@ -46,7 +51,9 @@ def _extract_uuid_filter(metadata: dict | None, key: str) -> set[uuid.UUID] | No
         try:
             values.add(uuid.UUID(raw))
         except ValueError:
-            logger.warning("Ignoring invalid UUID in metadata filter", key=key, value=raw)
+            logger.warning(
+                "Ignoring invalid UUID in metadata filter", key=key, value=raw
+            )
 
     return values
 
@@ -122,7 +129,11 @@ async def chat(
         user_agents = await get_user_agents(db, user_id_uuid, include_installed=True)
         user_mcp_tools = await get_user_mcp_tools(db, user_id_uuid)
 
-        metadata = request.content.metadata if isinstance(request.content.metadata, dict) else {}
+        metadata = (
+            request.content.metadata
+            if isinstance(request.content.metadata, dict)
+            else {}
+        )
         enabled_agent_ids = _extract_uuid_filter(metadata, "enabled_agent_ids")
         enabled_mcp_tool_ids = _extract_uuid_filter(metadata, "enabled_mcp_tool_ids")
 
@@ -163,7 +174,8 @@ async def chat(
             )
         logger.info("Session ready", session_id=session_id)
         response = await process_chat_message(
-            request, session,
+            request,
+            session,
             db_agent_configs=agent_configs,
             db_mcp_tool_configs=mcp_tool_configs,
         )
@@ -189,7 +201,9 @@ async def get_session_info(
         # Validate session ownership
         is_owner = await validate_session_ownership(db, user_id_uuid, session_id)
         if not is_owner:
-            raise HTTPException(status_code=403, detail="Session does not belong to you")
+            raise HTTPException(
+                status_code=403, detail="Session does not belong to you"
+            )
 
         session = await session_service.get_session(
             app_name="orchestrator_api",
@@ -201,4 +215,44 @@ async def get_session_info(
         raise
     except Exception as e:
         logger.error(error=e, message="Error retrieving session info")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/chat/session/{session_id}", status_code=status.HTTP_200_OK)
+async def clear_session(
+    session_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Clear a user's chat session in ADK storage and remove its ownership mapping."""
+    try:
+        user_id = current_user["user_id"]
+        user_id_uuid = uuid.UUID(user_id)
+
+        user_session = await get_user_session_by_adk_session_id(db, session_id)
+        if user_session and user_session.user_id != user_id_uuid:
+            raise HTTPException(
+                status_code=403, detail="Session does not belong to you"
+            )
+
+        if not user_session:
+            return {
+                "session_id": session_id,
+                "cleared": False,
+                "message": "Session not found; nothing to clear",
+            }
+
+        await session_service.delete_session(
+            app_name=user_session.app_name,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        await delete_user_session(db, user_id_uuid, session_id)
+
+        logger.info("Session cleared", user_id=user_id, session_id=session_id)
+        return {"session_id": session_id, "cleared": True, "message": "Session cleared"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(error=e, message="Error clearing session")
         raise HTTPException(status_code=500, detail=str(e))

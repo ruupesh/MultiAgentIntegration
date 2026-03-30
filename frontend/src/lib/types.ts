@@ -66,6 +66,12 @@ export interface ChatResponse {
   timestamp: string;
 }
 
+export interface ChatClearResponse {
+  session_id: string;
+  cleared: boolean;
+  message: string;
+}
+
 // Local message type for the UI
 export interface ChatMessage {
   id: string;

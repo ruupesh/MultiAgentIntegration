@@ -71,7 +71,7 @@ fetch_toolset = McpToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
             command="npx",
-            args=["-y", "fetch-mcp"],
+            args=["-y", "fetch-mcp@0.0.2"],
         ),
         timeout=30.0,
     )
